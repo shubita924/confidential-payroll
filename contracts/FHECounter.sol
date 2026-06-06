@@ -4,10 +4,10 @@ pragma solidity ^0.8.24;
 import {FHE, euint32, externalEuint32} from "@fhevm/solidity/lib/FHE.sol";
 import {ZamaEthereumConfig} from "@fhevm/solidity/config/ZamaConfig.sol";
 
-/// @title Confidential Payroll
-/// @notice Employer pays salaries as encrypted amounts. Balances accumulate and
-///         stay encrypted on-chain; only the employee and the employer can decrypt.
-contract ConfidentialPayroll is ZamaEthereumConfig {
+/// @title A simple FHE counter contract
+/// @author fhevm-hardhat-template
+/// @notice A very basic example contract showing how to work with encrypted data using FHEVM.
+contract FHECounter is ZamaEthereumConfig {
     euint32 private _count;
 
     /// @notice Returns the current count
