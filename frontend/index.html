@@ -16,6 +16,12 @@
 <body>
   <h1>🔒 Confidential Payroll</h1>
   <button id="connect">Connect wallet</button>
+  <div id="panel" style="display:none; margin-top:20px;">
+    <h2 style="font-size:1.1rem;">Pay salary</h2>
+    <input id="employee" placeholder="Employee address (0x...)" style="width:100%; padding:8px; margin-bottom:8px;" />
+    <input id="amount" type="number" placeholder="Amount" style="width:100%; padding:8px; margin-bottom:8px;" />
+    <button id="pay">Encrypt & pay</button>
+  </div>
   <pre id="log">Logs will appear here…</pre>
   <script src="app.js"></script>
 </body>

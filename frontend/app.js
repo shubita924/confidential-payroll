@@ -50,8 +50,41 @@ document.getElementById("connect").addEventListener("click", async () => {
     await SDK.initSDK();
     instance = await SDK.createInstance({ ...SDK.SepoliaConfig, network: eth });
     log("✓ SDK ready — encryption is live.");
+    document.getElementById("panel").style.display = "block";
   } catch (e) {
     log("ERROR: " + (e.message || e));
     console.error(e);
   }
 });
+
+
+
+const ABI = [
+    "function paySalary(address employee, bytes32 amount, bytes inputProof) external",
+  ];
+  
+  document.getElementById("pay").addEventListener("click", async () => {
+    try {
+      const employee = document.getElementById("employee").value.trim();
+      const amount = parseInt(document.getElementById("amount").value, 10);
+      if (!ethers.isAddress(employee)) { log("❌ Invalid employee address."); return; }
+      if (!Number.isInteger(amount) || amount <= 0) { log("❌ Enter a positive amount."); return; }
+  
+      const userAddr = await signer.getAddress();
+  
+      log(`Encrypting ${amount} for ${employee}…`);
+      const input = instance.createEncryptedInput(CONTRACT, userAddr);
+      input.add32(amount);
+      const enc = await input.encrypt();
+      log("✓ Encrypted. Sending transaction…");
+  
+      const contract = new ethers.Contract(CONTRACT, ABI, signer);
+      const tx = await contract.paySalary(employee, enc.handles[0], enc.inputProof);
+      log("tx sent: " + tx.hash);
+      await tx.wait();
+      log("✓ Salary paid on-chain. The amount is encrypted — not visible on Etherscan.");
+    } catch (e) {
+      log("ERROR: " + (e.message || e));
+      console.error(e);
+    }
+  });
