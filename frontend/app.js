@@ -6,6 +6,11 @@ const short = (a) => a.slice(0, 6) + "…" + a.slice(-4);
 
 if (window.ethereum) {
   window.ethereum.on("chainChanged", () => window.location.reload());
+  window.ethereum.on("accountsChanged", () => window.location.reload());
+}
+
+if (window.ethereum) {
+  window.ethereum.on("chainChanged", () => window.location.reload());
 }
 
 let provider, signer, instance;
@@ -73,10 +78,14 @@ const PAY_ABI = ["function paySalary(address employee, bytes32 amount, bytes inp
 
 document.getElementById("pay").addEventListener("click", async () => {
   const btn = document.getElementById("pay");
+  const result = document.getElementById("payResult");
+  result.style.display = "none";
   btn.disabled = true;
   try {
-    const employee = document.getElementById("employee").value.trim();
-    const amount = parseInt(document.getElementById("amount").value, 10);
+    const employeeEl = document.getElementById("employee");
+    const amountEl = document.getElementById("amount");
+    const employee = employeeEl.value.trim();
+    const amount = parseInt(amountEl.value, 10);
     if (!ethers.isAddress(employee)) { log("❌ Invalid employee address."); return; }
     if (!Number.isInteger(amount) || amount <= 0) { log("❌ Enter a positive amount."); return; }
 
@@ -87,16 +96,25 @@ document.getElementById("pay").addEventListener("click", async () => {
     const enc = await input.encrypt();
     log("✓ Encrypted. Sending transaction…");
 
+    btn.textContent = "Sending…";
     const contract = new ethers.Contract(CONTRACT, PAY_ABI, signer);
     const tx = await contract.paySalary(employee, enc.handles[0], enc.inputProof);
     log("tx sent: " + tx.hash);
     await tx.wait();
     log("✓ Salary paid on-chain. The amount is encrypted — not visible on Etherscan.");
+
+    // Visible success + clear the form
+    result.innerHTML = `✓ Paid ${amount} to ${employee.slice(0,6)}…${employee.slice(-4)} · ` +
+      `<a href="https://sepolia.etherscan.io/tx/${tx.hash}" target="_blank" style="color:var(--accent);">view tx ↗</a>`;
+    result.style.display = "block";
+    employeeEl.value = "";
+    amountEl.value = "";
   } catch (e) {
     log("ERROR: " + (e.message || e));
     console.error(e);
   } finally {
     btn.disabled = false;
+    btn.textContent = "Encrypt & pay";
   }
 });
 
